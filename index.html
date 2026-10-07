@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Birthday God Pack</title>
+  <!-- Canvas Confetti for the grand finale -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --gold: #FFD700;
+      --holo-speed: 3s;
+    }
+    
+    * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      margin: 0; padding: 0;
+      background-color: #0f172a;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      perspective: 1000px;
+    }
+
+    /* --- Pack Screen --- */
+    #pack-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .booster-pack {
+      width: 260px;
+      height: 420px;
+      background: linear-gradient(135deg, #1e293b, #334155);
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.2);
+      border: 2px solid #475569;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .booster-pack::before {
+      content: '';
+      position: absolute;
+      top: -100%; left: -100%;
+      width: 300%; height: 300%;
+      background: linear-gradient(115deg, transparent 30%, rgba(255, 215, 0, 0.4) 45%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 215, 0, 0.4) 55%, transparent 70%);
+      animation: foil-sweep 5s infinite linear;
+    }
+
+    .pack-text {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .pack-text h1 { font-size: 28px; color: var(--gold); text-shadow: 2px 2px 4px #000; margin: 0; }
+    .pack-text p { font-size: 14px; color: #cbd5e1; margin-top: 10px; }
+    
+    .rip-button {
+      margin-top: 30px;
+      padding: 15px 40px;
+      background: var(--gold);
+      color: #000;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+      animation: pulse 2s infinite;
+    }
+
+    /* --- Card Reveal Screen --- */
+    #card-reveal-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .card-wrapper {
+      position: relative;
+      width: 85vw;
+      max-width: 400px;
+      aspect-ratio: 2.5 / 3.5;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card-image {
+      width: 100%;
+      height: 100%;
+      border-radius: 4.75% / 3.5%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      object-fit: cover;
+      position: absolute;
+      top: 0; left: 0;
+      backface-visibility: hidden;
+    }
+
+    /* Dynamic Holographic Overlay */
+    .holo-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      border-radius: 4.75% / 3.5%;
+      mix-blend-mode: color-dodge;
+      opacity: 0.8;
+      pointer-events: none;
+      background: linear-gradient(115deg, transparent 20%, #ff0084 30%, #00e1ff 45%, #ffeb3b 55%, transparent 70%);
+      background-size: 200% 200%;
+      animation: holo-shine var(--holo-speed) infinite linear;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.3);
+    }
+
+    .instruction {
+      margin-top: 30px;
+      font-size: 16px;
+      color: #94a3b8;
+      animation: pulse 2s infinite;
+    }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes foil-sweep {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(50%, 50%) rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0) rotate(0); }
+      20% { transform: translateX(-5px) rotate(-2deg); }
+      40% { transform: translateX(5px) rotate(2deg); }
+      60% { transform: translateX(-5px) rotate(-2deg); }
+      80% { transform: translateX(5px) rotate(2deg); }
+    }
+    @keyframes holo-shine {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 1: The Pack -->
+  <div id="pack-container">
+    <div class="booster-pack" onclick="ripPack()">
+      <div class="pack-text">
+        <h1>GOD PACK</h1>
+        <p>Birthday Edition 2026</p>
+      </div>
+    </div>
+    <button class="rip-button" onclick="ripPack()">TAP TO RIP OPEN</button>
+  </div>
+
+  <!-- Screen 2: The Cards -->
+  <div id="card-reveal-container">
+    <div class="card-wrapper" id="card-wrapper" onclick="nextCard()">
+      <img id="current-card" class="card-image" src="" alt="Pokemon Card">
+      <div class="holo-overlay"></div>
+    </div>
+    <div class="instruction" id="instruction-text">Tap card to reveal next pull</div>
+  </div>
+
+  <script>
+    // The ultimate "God Pack" pull sequence (using reliable high-res images from pokemontcg.io)
+    const cards = [
+      "https://images.pokemontcg.io/base1/4_hires.png",      // Base Set Charizard
+      "https://images.pokemontcg.io/neo1/9_hires.png",       // 1st Ed Neo Genesis Lugia
+      "https://images.pokemontcg.io/swsh11/186_hires.png",   // Giratina V Alt Art
+      "https://images.pokemontcg.io/swsh7/215_hires.png",    // Umbreon VMAX Alt Art (Moonbreon)
+      "https://images.pokemontcg.io/cel25c/24_hires.png"     // Birthday Pikachu (Grand Finale)
+    ];
+
+    let currentIndex = 0;
+    const packContainer = document.getElementById('pack-container');
+    const packElement = document.querySelector('.booster-pack');
+    const cardContainer = document.getElementById('card-reveal-container');
+    const cardImage = document.getElementById('current-card');
+    const cardWrapper = document.getElementById('card-wrapper');
+    const instructionText = document.getElementById('instruction-text');
+
+    // Preload images to prevent lag on mobile tapping
+    cards.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+
+    function ripPack() {
+      // 1. Shake animation simulating a tear
+      packElement.style.animation = "shake 0.4s ease-in-out";
+      
+      setTimeout(() => {
+        // 2. Fade out pack
+        packContainer.style.opacity = "0";
+        packContainer.style.transform = "scale(1.2)";
+        
+        setTimeout(() => {
+          // 3. Load first card & fade in reveal screen
+          packContainer.style.display = "none";
+          cardImage.src = cards[0];
+          cardContainer.style.display = "flex";
+          
+          // Small delay to allow CSS to apply display:flex before fading in
+          requestAnimationFrame(() => {
+            cardContainer.style.opacity = "1";
+          });
+        }, 500);
+      }, 400);
+    }
+
+    function nextCard() {
+      if (currentIndex < cards.length - 1) {
+        // Slide away effect
+        cardWrapper.style.transform = "translateX(-150vw) rotateY(-45deg)";
+        cardWrapper.style.opacity = "0";
+        
+        setTimeout(() => {
+          currentIndex++;
+          cardImage.src = cards[currentIndex];
+          
+          // Reset from right side
+          cardWrapper.style.transition = "none";
+          cardWrapper.style.transform = "translateX(150vw) rotateY(45deg)";
+          
+          // Animate into center
+          requestAnimationFrame(() => {
+            cardWrapper.style.transition = "transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s";
+            cardWrapper.style.transform = "translateX(0) rotateY(0)";
+            cardWrapper.style.opacity = "1";
+          });
+
+          // Trigger confetti on the final card (Birthday Pikachu)
+          if (currentIndex === cards.length - 1) {
+            instructionText.innerText = "HAPPY BIRTHDAY!";
+            instructionText.style.color = "#FFD700";
+            instructionText.style.fontWeight = "bold";
+            triggerConfetti();
+          }
+        }, 300);
+      } else {
+        // Re-trigger confetti if they keep tapping the final card
+        triggerConfetti();
+      }
+    }
+
+    function triggerConfetti() {
+      var duration = 3 * 1000;
+      var end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ['#FFD700', '#ff0000', '#0000ff']
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ['#FFD700', '#ff0000', '#0000ff']
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      }());
+    }
+  </script>
+</body>
+</html>
